@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "./contexts/LanguageContext";
 import MovieInput from "./components/MovieInput";
 import ResultModal from "./components/ResultModal";
@@ -53,46 +53,48 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hints, setHints] = useState<string[]>([]);
+  const movieFetched = useRef(false);
 
-  // Busca um filme aleatório
+  const fetchRandomMovie = async () => {
+    try {
+      setLoading(true);
+      const randomPage = Math.floor(Math.random() * 3) + 1;
+      const response = await fetch(
+        `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${
+          language === "pt" ? "pt-BR" : "en-US"
+        }&page=${randomPage}`
+      );
+      const data = await response.json();
+      const popularMovies = data.results.filter(
+        (movie: any) => movie.vote_count > 1000
+      );
+      const randomMovie =
+        popularMovies[Math.floor(Math.random() * popularMovies.length)];
+      const detailsResponse = await fetch(
+        `${BASE_URL}/movie/${randomMovie.id}?api_key=${API_KEY}&language=${
+          language === "pt" ? "pt-BR" : "en-US"
+        }&append_to_response=credits`
+      );
+      const movieDetails = await detailsResponse.json();
+      setMovie(movieDetails);
+      movieFetched.current = true;
+    } catch (error) {
+      console.error("Error fetching movie:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchRandomMovie = async () => {
-      try {
-        const randomPage = Math.floor(Math.random() * 3) + 1;
-        const response = await fetch(
-          `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${
-            language === "pt" ? "pt-BR" : "en-US"
-          }&page=${randomPage}`
-        );
-        const data = await response.json();
-        const popularMovies = data.results.filter(
-          (movie: any) => movie.vote_count > 1000
-        );
-        const randomMovie =
-          popularMovies[Math.floor(Math.random() * popularMovies.length)];
+    if (!movieFetched.current) fetchRandomMovie();
+  }, []);
 
-        const detailsResponse = await fetch(
-          `${BASE_URL}/movie/${randomMovie.id}?api_key=${API_KEY}&language=${
-            language === "pt" ? "pt-BR" : "en-US"
-          }&append_to_response=credits`
-        );
-        const movieDetails = await detailsResponse.json();
+  useEffect(() => {
+    if (movie) setHints(generateHints(movie));
+  }, [movie]);
 
-        setMovie(movieDetails);
-      } catch (error) {
-        console.error("Error fetching movie:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRandomMovie();
-  }, [language]);
-
-  // Gera as dicas do jogo
-  const generateHints = (): string[] => {
-    if (!movie) return [];
-
+  const generateHints = (movie: Movie): string[] => {
     const releaseYear = new Date(movie.release_date).getFullYear();
     const decade = Math.floor(releaseYear / 10) * 10;
     const director = movie.credits?.crew?.find(
@@ -197,8 +199,6 @@ export default function Home() {
     return allHints.sort(() => Math.random() - 0.5).slice(0, 5);
   };
 
-  const hints = movie ? generateHints() : [];
-
   const normalizeString = (str: string) =>
     str
       .toLowerCase()
@@ -207,10 +207,8 @@ export default function Home() {
 
   const handleGuess = () => {
     if (!guess.trim() || !movie) return;
-
     const normalizedGuess = normalizeString(guess);
     const normalizedTitle = normalizeString(movie.title);
-
     if (normalizedGuess === normalizedTitle) {
       const points = 5 - currentHint;
       setScore(score + points);
@@ -229,38 +227,11 @@ export default function Home() {
     setShowModal(false);
     setCurrentHint(0);
     setGuess("");
-    setLoading(true);
-
-    try {
-      const randomPage = Math.floor(Math.random() * 3) + 1;
-      const response = await fetch(
-        `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${
-          language === "pt" ? "pt-BR" : "en-US"
-        }&page=${randomPage}`
-      );
-      const data = await response.json();
-      const popularMovies = data.results.filter(
-        (movie: any) => movie.vote_count > 1000
-      );
-      const randomMovie =
-        popularMovies[Math.floor(Math.random() * popularMovies.length)];
-
-      const detailsResponse = await fetch(
-        `${BASE_URL}/movie/${randomMovie.id}?api_key=${API_KEY}&language=${
-          language === "pt" ? "pt-BR" : "en-US"
-        }&append_to_response=credits`
-      );
-      const movieDetails = await detailsResponse.json();
-
-      setMovie(movieDetails);
-    } catch (error) {
-      console.error("Error fetching movie:", error);
-    } finally {
-      setLoading(false);
-    }
+    setHints([]);
+    await fetchRandomMovie();
   };
 
-  if (loading) {
+  if (loading || !movie || hints.length === 0) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         <p className="text-lg text-gray-900 dark:text-white">
