@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useLanguage } from "./contexts/LanguageContext";
-import MovieInput from "./components/MovieInput";
-import ResultModal from "./components/ResultModal";
+import { useLanguage } from "@/contexts/LanguageContext";
+import MovieInput from "@/components/MovieInput";
+import ResultModal from "@/components/ResultModal";
 
 const API_KEY = "241abcb6a8de5f1147f09a5f83b41282";
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -29,7 +29,7 @@ export default function Home() {
         );
         const data = await response.json();
         const popularMovies = data.results.filter(
-          (movie) => movie.vote_count > 1000
+          (movie: any) => movie.vote_count > 1000
         );
         const randomMovie =
           popularMovies[Math.floor(Math.random() * popularMovies.length)];
@@ -56,59 +56,109 @@ export default function Home() {
     if (!movie) return [];
 
     const releaseYear = new Date(movie.release_date).getFullYear();
-    const director =
-      movie.credits?.crew?.find((person) => person.job === "Director")?.name ||
-      (language === "en" ? "Unknown" : "Desconhecido");
-    const mainActor =
-      movie.credits?.cast?.[0]?.name ||
-      (language === "en" ? "Unknown" : "Desconhecido");
-    const secondActor =
-      movie.credits?.cast?.[1]?.name ||
-      (language === "en" ? "Unknown" : "Desconhecido");
-    const thirdActor =
-      movie.credits?.cast?.[2]?.name ||
-      (language === "en" ? "Unknown" : "Desconhecido");
-    const genres =
-      movie.genres?.map((g) => g.name).join(", ") ||
-      (language === "en" ? "Unknown" : "Desconhecido");
+    const decade = Math.floor(releaseYear / 10) * 10;
+    const director = movie.credits?.crew?.find(
+      (person) => person.job === "Director"
+    )?.name;
+    const cast = movie.credits?.cast || [];
+    const mainActor = cast[0]?.name;
+    const secondActor = cast[1]?.name;
+    const thirdActor = cast[2]?.name;
+    const genres = movie.genres || [];
+    const primaryGenre = genres[0]?.name;
     const voteAverage = movie.vote_average
       ? movie.vote_average.toFixed(1)
-      : "N/A";
-    const productionCountry =
-      movie.production_countries?.[0]?.name ||
-      (language === "en" ? "Unknown" : "Desconhecido");
+      : null;
+    const country = movie.production_countries?.[0]?.name;
+    const budget = movie.budget;
+    const revenue = movie.revenue;
+
+    const allHints = [];
 
     if (language === "pt") {
-      return [
-        `Este é um filme de ${genres} que foi produzido em ${productionCountry} e tem uma avaliação de ${voteAverage}/10 no TMDB.`,
-        `Lançado na década de ${
-          Math.floor(releaseYear / 10) * 10
-        }, este filme foi dirigido por ${director} e tem ${
-          movie.runtime
-        } minutos.`,
-        `O elenco principal inclui ${mainActor}, ${secondActor} e ${thirdActor}.`,
-        `O slogan deste filme é: "${
-          movie.tagline || "Sem slogan disponível"
-        }" e foi lançado em ${releaseYear}.`,
-        `Este filme começa com a letra "${
-          movie.title[0]
-        }" e a sinopse diz: "${movie.overview?.substring(0, 100)}..."`,
-      ];
+      if (genres.length > 0)
+        allHints.push(
+          `Este é um filme de ${genres.map((g) => g.name).join(" e ")}.`
+        );
+      if (country) allHints.push(`Foi produzido em ${country}.`);
+      if (voteAverage)
+        allHints.push(`Tem uma avaliação de ${voteAverage}/10 no TMDB.`);
+      if (movie.runtime)
+        allHints.push(`A duração do filme é de ${movie.runtime} minutos.`);
+      allHints.push(`Foi lançado na década de ${decade}.`);
+      if (director) allHints.push(`O diretor deste filme é ${director}.`);
+      if (mainActor) allHints.push(`${mainActor} atua neste filme.`);
+      if (secondActor && thirdActor)
+        allHints.push(
+          `${secondActor} e ${thirdActor} também fazem parte do elenco.`
+        );
+      if (movie.tagline) allHints.push(`O slogan é: "${movie.tagline}"`);
+      if (budget > 0)
+        allHints.push(
+          `Teve um orçamento de aproximadamente ${(budget / 1000000).toFixed(
+            0
+          )} milhões.`
+        );
+      if (revenue > 0)
+        allHints.push(
+          `Arrecadou cerca de ${(revenue / 1000000).toFixed(
+            0
+          )} milhões nas bilheterias.`
+        );
+      allHints.push(`Foi lançado especificamente em ${releaseYear}.`);
+      if (movie.overview)
+        allHints.push(
+          `A sinopse menciona: "${movie.overview.substring(0, 80)}..."`
+        );
+      allHints.push(`O título começa com a letra "${movie.title[0]}".`);
+      if (movie.original_language !== "pt")
+        allHints.push(
+          `O idioma original do filme é ${movie.original_language.toUpperCase()}.`
+        );
+    } else {
+      if (genres.length > 0)
+        allHints.push(
+          `This is a ${genres.map((g) => g.name).join(" and ")} film.`
+        );
+      if (country) allHints.push(`It was produced in ${country}.`);
+      if (voteAverage)
+        allHints.push(`It has a ${voteAverage}/10 rating on TMDB.`);
+      if (movie.runtime)
+        allHints.push(`The runtime is ${movie.runtime} minutes.`);
+      allHints.push(`It was released in the ${decade}s.`);
+      if (director) allHints.push(`The director of this film is ${director}.`);
+      if (mainActor) allHints.push(`${mainActor} stars in this movie.`);
+      if (secondActor && thirdActor)
+        allHints.push(
+          `${secondActor} and ${thirdActor} are also part of the cast.`
+        );
+      if (movie.tagline) allHints.push(`The tagline is: "${movie.tagline}"`);
+      if (budget > 0)
+        allHints.push(
+          `It had a budget of approximately ${(budget / 1000000).toFixed(
+            0
+          )} million.`
+        );
+      if (revenue > 0)
+        allHints.push(
+          `It grossed about ${(revenue / 1000000).toFixed(
+            0
+          )} million at the box office.`
+        );
+      allHints.push(`It was released specifically in ${releaseYear}.`);
+      if (movie.overview)
+        allHints.push(
+          `The plot mentions: "${movie.overview.substring(0, 80)}..."`
+        );
+      allHints.push(`The title starts with the letter "${movie.title[0]}".`);
+      if (movie.original_language !== "en")
+        allHints.push(
+          `The original language of the film is ${movie.original_language.toUpperCase()}.`
+        );
     }
 
-    return [
-      `This is a ${genres} film produced in ${productionCountry} with a ${voteAverage}/10 rating on TMDB.`,
-      `Released in the ${Math.floor(releaseYear / 10) * 10}s, this ${
-        movie.runtime
-      }-minute film was directed by ${director}.`,
-      `The main cast includes ${mainActor}, ${secondActor}, and ${thirdActor}.`,
-      `The movie's tagline is: "${
-        movie.tagline || "No tagline available"
-      }" and it was released in ${releaseYear}.`,
-      `This film starts with the letter "${
-        movie.title[0]
-      }" and the plot says: "${movie.overview?.substring(0, 100)}..."`,
-    ];
+    const shuffled = allHints.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 5);
   };
 
   const hints = movie ? generateHints() : [];
@@ -147,7 +197,7 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const randomPage = Math.floor(Math.random() * 5) + 1;
+      const randomPage = Math.floor(Math.random() * 3) + 1;
       const response = await fetch(
         `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${
           language === "pt" ? "pt-BR" : "en-US"
