@@ -19,13 +19,16 @@ export default function Home() {
   useEffect(() => {
     const fetchRandomMovie = async () => {
       try {
-        const randomPage = Math.floor(Math.random() * 20) + 1;
+        const randomPage = Math.floor(Math.random() * 5) + 1;
         const response = await fetch(
           `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=en-US&page=${randomPage}`
         );
         const data = await response.json();
+        const popularMovies = data.results.filter(
+          (movie) => movie.vote_count > 1000
+        );
         const randomMovie =
-          data.results[Math.floor(Math.random() * data.results.length)];
+          popularMovies[Math.floor(Math.random() * popularMovies.length)];
 
         const detailsResponse = await fetch(
           `${BASE_URL}/movie/${randomMovie.id}?api_key=${API_KEY}&language=en-US&append_to_response=credits`
