@@ -8,9 +8,45 @@ import ResultModal from "./components/ResultModal";
 const API_KEY = "241abcb6a8de5f1147f09a5f83b41282";
 const BASE_URL = "https://api.themoviedb.org/3";
 
+interface CrewMember {
+  job: string;
+  name: string;
+}
+
+interface CastMember {
+  name: string;
+}
+
+interface Genre {
+  name: string;
+}
+
+interface ProductionCountry {
+  name: string;
+}
+
+interface Movie {
+  id: number;
+  title: string;
+  release_date: string;
+  runtime?: number;
+  tagline?: string;
+  vote_average?: number;
+  budget?: number;
+  revenue?: number;
+  overview?: string;
+  original_language?: string;
+  genres?: Genre[];
+  production_countries?: ProductionCountry[];
+  credits?: {
+    cast?: CastMember[];
+    crew?: CrewMember[];
+  };
+}
+
 export default function Home() {
   const { language } = useLanguage();
-  const [movie, setMovie] = useState<any>(null);
+  const [movie, setMovie] = useState<Movie | null>(null);
   const [currentHint, setCurrentHint] = useState(0);
   const [score, setScore] = useState(0);
   const [guess, setGuess] = useState("");
@@ -18,6 +54,7 @@ export default function Home() {
   const [gameWon, setGameWon] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Busca um filme aleatório
   useEffect(() => {
     const fetchRandomMovie = async () => {
       try {
@@ -42,9 +79,9 @@ export default function Home() {
         const movieDetails = await detailsResponse.json();
 
         setMovie(movieDetails);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching movie:", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -52,7 +89,8 @@ export default function Home() {
     fetchRandomMovie();
   }, [language]);
 
-  const generateHints = () => {
+  // Gera as dicas do jogo
+  const generateHints = (): string[] => {
     if (!movie) return [];
 
     const releaseYear = new Date(movie.release_date).getFullYear();
@@ -65,20 +103,19 @@ export default function Home() {
     const secondActor = cast[1]?.name;
     const thirdActor = cast[2]?.name;
     const genres = movie.genres || [];
-    const primaryGenre = genres[0]?.name;
     const voteAverage = movie.vote_average
       ? movie.vote_average.toFixed(1)
       : null;
     const country = movie.production_countries?.[0]?.name;
-    const budget = movie.budget;
-    const revenue = movie.revenue;
+    const budget = movie.budget ?? 0;
+    const revenue = movie.revenue ?? 0;
 
-    const allHints = [];
+    const allHints: string[] = [];
 
     if (language === "pt") {
       if (genres.length > 0)
         allHints.push(
-          `Este é um filme de ${genres.map((g: any) => g.name).join(" e ")}.`
+          `Este é um filme de ${genres.map((g) => g.name).join(" e ")}.`
         );
       if (country) allHints.push(`Foi produzido em ${country}.`);
       if (voteAverage)
@@ -95,13 +132,13 @@ export default function Home() {
       if (movie.tagline) allHints.push(`O slogan é: "${movie.tagline}"`);
       if (budget > 0)
         allHints.push(
-          `Teve um orçamento de aproximadamente ${(budget / 1000000).toFixed(
+          `Teve um orçamento de aproximadamente ${(budget / 1_000_000).toFixed(
             0
           )} milhões.`
         );
       if (revenue > 0)
         allHints.push(
-          `Arrecadou cerca de ${(revenue / 1000000).toFixed(
+          `Arrecadou cerca de ${(revenue / 1_000_000).toFixed(
             0
           )} milhões nas bilheterias.`
         );
@@ -113,12 +150,12 @@ export default function Home() {
       allHints.push(`O título começa com a letra "${movie.title[0]}".`);
       if (movie.original_language !== "pt")
         allHints.push(
-          `O idioma original do filme é ${movie.original_language.toUpperCase()}.`
+          `O idioma original do filme é ${movie.original_language?.toUpperCase()}.`
         );
     } else {
       if (genres.length > 0)
         allHints.push(
-          `This is a ${genres.map((g: any) => g.name).join(" and ")} film.`
+          `This is a ${genres.map((g) => g.name).join(" and ")} film.`
         );
       if (country) allHints.push(`It was produced in ${country}.`);
       if (voteAverage)
@@ -135,13 +172,13 @@ export default function Home() {
       if (movie.tagline) allHints.push(`The tagline is: "${movie.tagline}"`);
       if (budget > 0)
         allHints.push(
-          `It had a budget of approximately ${(budget / 1000000).toFixed(
+          `It had a budget of approximately ${(budget / 1_000_000).toFixed(
             0
           )} million.`
         );
       if (revenue > 0)
         allHints.push(
-          `It grossed about ${(revenue / 1000000).toFixed(
+          `It grossed about ${(revenue / 1_000_000).toFixed(
             0
           )} million at the box office.`
         );
@@ -153,22 +190,20 @@ export default function Home() {
       allHints.push(`The title starts with the letter "${movie.title[0]}".`);
       if (movie.original_language !== "en")
         allHints.push(
-          `The original language of the film is ${movie.original_language.toUpperCase()}.`
+          `The original language of the film is ${movie.original_language?.toUpperCase()}.`
         );
     }
 
-    const shuffled = allHints.sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 5);
+    return allHints.sort(() => Math.random() - 0.5).slice(0, 5);
   };
 
   const hints = movie ? generateHints() : [];
 
-  const normalizeString = (str: string) => {
-    return str
+  const normalizeString = (str: string) =>
+    str
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9]/g, "");
-  };
 
   const handleGuess = () => {
     if (!guess.trim() || !movie) return;
@@ -218,9 +253,9 @@ export default function Home() {
       const movieDetails = await detailsResponse.json();
 
       setMovie(movieDetails);
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching movie:", error);
+    } finally {
       setLoading(false);
     }
   };
