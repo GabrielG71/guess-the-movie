@@ -8,6 +8,7 @@ interface ResultModalProps {
   movie: any;
   points: number;
   onNext: () => void;
+  language: string;
 }
 
 export default function ResultModal({
@@ -16,6 +17,7 @@ export default function ResultModal({
   movie,
   points,
   onNext,
+  language,
 }: ResultModalProps) {
   if (!show || !movie) return null;
 
@@ -30,7 +32,13 @@ export default function ResultModal({
                 : "text-red-600 dark:text-red-400"
             }`}
           >
-            {gameWon ? "🎉 Congratulations!" : "😞 Game Over!"}
+            {gameWon
+              ? language === "en"
+                ? "🎉 Congratulations!"
+                : "🎉 Parabéns!"
+              : language === "en"
+              ? "😞 Game Over!"
+              : "😞 Fim de Jogo!"}
           </h2>
 
           <div className="flex gap-4">
@@ -50,7 +58,7 @@ export default function ResultModal({
               </p>
               {gameWon && (
                 <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                  +{points} points!
+                  +{points} {language === "en" ? "points!" : "pontos!"}
                 </p>
               )}
             </div>
@@ -62,7 +70,7 @@ export default function ResultModal({
             onClick={onNext}
             className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium py-3 rounded-lg transition-colors"
           >
-            Next Movie
+            {language === "en" ? "Next Movie" : "Próximo Filme"}
           </button>
         </div>
       </div>
