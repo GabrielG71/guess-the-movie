@@ -10,7 +10,7 @@ const BASE_URL = "https://api.themoviedb.org/3";
 
 export default function Home() {
   const { language } = useLanguage();
-  const [movie, setMovie] = useState(null);
+  const [movie, setMovie] = useState<any>(null);
   const [currentHint, setCurrentHint] = useState(0);
   const [score, setScore] = useState(0);
   const [guess, setGuess] = useState("");
@@ -78,7 +78,7 @@ export default function Home() {
     if (language === "pt") {
       if (genres.length > 0)
         allHints.push(
-          `Este é um filme de ${genres.map((g) => g.name).join(" e ")}.`
+          `Este é um filme de ${genres.map((g: any) => g.name).join(" e ")}.`
         );
       if (country) allHints.push(`Foi produzido em ${country}.`);
       if (voteAverage)
@@ -118,7 +118,7 @@ export default function Home() {
     } else {
       if (genres.length > 0)
         allHints.push(
-          `This is a ${genres.map((g) => g.name).join(" and ")} film.`
+          `This is a ${genres.map((g: any) => g.name).join(" and ")} film.`
         );
       if (country) allHints.push(`It was produced in ${country}.`);
       if (voteAverage)
@@ -163,7 +163,7 @@ export default function Home() {
 
   const hints = movie ? generateHints() : [];
 
-  const normalizeString = (str) => {
+  const normalizeString = (str: string) => {
     return str
       .toLowerCase()
       .trim()
@@ -205,7 +205,7 @@ export default function Home() {
       );
       const data = await response.json();
       const popularMovies = data.results.filter(
-        (movie) => movie.vote_count > 1000
+        (movie: any) => movie.vote_count > 1000
       );
       const randomMovie =
         popularMovies[Math.floor(Math.random() * popularMovies.length)];
