@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import MovieInput from './components/MovieInput';
-import ResultModal from './components/ResultModal';
+import { useState, useEffect } from "react";
+import MovieInput from "./components/MovieInput";
+import ResultModal from "./components/ResultModal";
 
-const API_KEY = '241abcb6a8de5f1147f09a5f83b41282';
-const BASE_URL = 'https://api.themoviedb.org/3';
+const API_KEY = "241abcb6a8de5f1147f09a5f83b41282";
+const BASE_URL = "https://api.themoviedb.org/3";
 
 export default function Home() {
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState("en");
   const [movie, setMovie] = useState(null);
   const [currentHint, setCurrentHint] = useState(0);
   const [score, setScore] = useState(0);
@@ -22,14 +22,21 @@ export default function Home() {
       try {
         const randomPage = Math.floor(Math.random() * 5) + 1;
         const response = await fetch(
-          `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${language === 'pt' ? 'pt-BR' : 'en-US'}&page=${randomPage}`
+          `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${
+            language === "pt" ? "pt-BR" : "en-US"
+          }&page=${randomPage}`
         );
         const data = await response.json();
-        const popularMovies = data.results.filter(movie => movie.vote_count > 1000);
-        const randomMovie = popularMovies[Math.floor(Math.random() * popularMovies.length)];
+        const popularMovies = data.results.filter(
+          (movie) => movie.vote_count > 1000
+        );
+        const randomMovie =
+          popularMovies[Math.floor(Math.random() * popularMovies.length)];
 
         const detailsResponse = await fetch(
-          `${BASE_URL}/movie/${randomMovie.id}?api_key=${API_KEY}&language=${language === 'pt' ? 'pt-BR' : 'en-US'}&append_to_response=credits`
+          `${BASE_URL}/movie/${randomMovie.id}?api_key=${API_KEY}&language=${
+            language === "pt" ? "pt-BR" : "en-US"
+          }&append_to_response=credits`
         );
         const movieDetails = await detailsResponse.json();
 
@@ -50,13 +57,19 @@ export default function Home() {
     const releaseYear = new Date(movie.release_date).getFullYear();
     const director =
       movie.credits?.crew?.find((person) => person.job === "Director")?.name ||
-      (language === 'en' ? "Unknown" : "Desconhecido");
-    const mainActor = movie.credits?.cast?.[0]?.name || (language === 'en' ? "Unknown" : "Desconhecido");
-    const genres = movie.genres?.map((g) => g.name).join(", ") || (language === 'en' ? "Unknown" : "Desconhecido");
+      (language === "en" ? "Unknown" : "Desconhecido");
+    const mainActor =
+      movie.credits?.cast?.[0]?.name ||
+      (language === "en" ? "Unknown" : "Desconhecido");
+    const genres =
+      movie.genres?.map((g) => g.name).join(", ") ||
+      (language === "en" ? "Unknown" : "Desconhecido");
 
-    if (language === 'pt') {
+    if (language === "pt") {
       return [
-        `Este filme foi lançado na década de ${Math.floor(releaseYear / 10) * 10} e pertence ao(s) gênero(s) ${genres}.`,
+        `Este filme foi lançado na década de ${
+          Math.floor(releaseYear / 10) * 10
+        } e pertence ao(s) gênero(s) ${genres}.`,
         `O filme tem aproximadamente ${movie.runtime} minutos de duração e foi dirigido por ${director}.`,
         `Uma das principais estrelas deste filme é ${mainActor}.`,
         `O slogan do filme é: "${movie.tagline || "Nenhum slogan disponível"}"`,
@@ -113,14 +126,21 @@ export default function Home() {
     try {
       const randomPage = Math.floor(Math.random() * 5) + 1;
       const response = await fetch(
-        `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${language === 'pt' ? 'pt-BR' : 'en-US'}&page=${randomPage}`
+        `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${
+          language === "pt" ? "pt-BR" : "en-US"
+        }&page=${randomPage}`
       );
       const data = await response.json();
-      const popularMovies = data.results.filter(movie => movie.vote_count > 1000);
-      const randomMovie = popularMovies[Math.floor(Math.random() * popularMovies.length)];
+      const popularMovies = data.results.filter(
+        (movie) => movie.vote_count > 1000
+      );
+      const randomMovie =
+        popularMovies[Math.floor(Math.random() * popularMovies.length)];
 
       const detailsResponse = await fetch(
-        `${BASE_URL}/movie/${randomMovie.id}?api_key=${API_KEY}&language=${language === 'pt' ? 'pt-BR' : 'en-US'}&append_to_response=credits`
+        `${BASE_URL}/movie/${randomMovie.id}?api_key=${API_KEY}&language=${
+          language === "pt" ? "pt-BR" : "en-US"
+        }&append_to_response=credits`
       );
       const movieDetails = await detailsResponse.json();
 
@@ -136,32 +156,35 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         <p className="text-lg text-gray-900 dark:text-white">
-          {language === 'en' ? 'Loading movie...' : 'Carregando filme...'}
+          {language === "en" ? "Loading movie..." : "Carregando filme..."}
         </p>
       </div>
     );
   }
 
   return (
-    <>
-      <Header language={language} onLanguageChange={setLanguage} />
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
       <main className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-2xl space-y-8">
           <div className="flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300">
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 dark:text-gray-400">{language === 'en' ? 'Hint:' : 'Dica:'}</span>
+              <span className="text-gray-500 dark:text-gray-400">
+                {language === "en" ? "Hint:" : "Dica:"}
+              </span>
               <span>{currentHint + 1}/5</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 dark:text-gray-400">{language === 'en' ? 'Score:' : 'Pontuação:'}</span>
+              <span className="text-gray-500 dark:text-gray-400">
+                {language === "en" ? "Score:" : "Pontuação:"}
+              </span>
               <span>{score}</span>
             </div>
           </div>
 
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 min-h-[200px] flex items-center justify-center border border-gray-200 dark:border-gray-700">
             <p className="text-lg text-gray-900 dark:text-white text-center">
-              {hints[currentHint] || (language === 'en' ? 'Loading hint...' : 'Carregando dica...')}
+              {hints[currentHint] ||
+                (language === "en" ? "Loading hint..." : "Carregando dica...")}
             </p>
           </div>
 
@@ -174,7 +197,7 @@ export default function Home() {
           />
         </div>
       </main>
-      <Footer language={language} onLanguageChange={setLanguage} />
+
       <ResultModal
         show={showModal}
         gameWon={gameWon}
@@ -183,6 +206,6 @@ export default function Home() {
         onNext={handleNextMovie}
         language={language}
       />
-    </>
+    </div>
   );
 }
