@@ -10,6 +10,7 @@ interface MovieInputProps {
   onChange: (value: string) => void;
   onSubmit: () => void;
   onSelect: (title: string) => void;
+  language: string;
 }
 
 export default function MovieInput({
@@ -17,6 +18,7 @@ export default function MovieInput({
   onChange,
   onSubmit,
   onSelect,
+  language,
 }: MovieInputProps) {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -30,9 +32,9 @@ export default function MovieInput({
 
       try {
         const response = await fetch(
-          `${BASE_URL}/search/movie?api_key=${API_KEY}&language=en-US&query=${encodeURIComponent(
-            value
-          )}&page=1`
+          `${BASE_URL}/search/movie?api_key=${API_KEY}&language=${
+            language === "pt" ? "pt-BR" : "en-US"
+          }&query=${encodeURIComponent(value)}&page=1`
         );
         const data = await response.json();
         setSuggestions(data.results.slice(0, 5));
@@ -55,7 +57,11 @@ export default function MovieInput({
       <div className="relative">
         <input
           type="text"
-          placeholder="Type the movie name..."
+          placeholder={
+            language === "en"
+              ? "Type the movie name..."
+              : "Digite o nome do filme..."
+          }
           value={value}
           onChange={(e) => {
             onChange(e.target.value);
@@ -90,7 +96,7 @@ export default function MovieInput({
         onClick={onSubmit}
         className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium py-3 rounded-lg transition-colors"
       >
-        Submit Guess
+        {language === "en" ? "Submit Guess" : "Enviar Resposta"}
       </button>
     </div>
   );
