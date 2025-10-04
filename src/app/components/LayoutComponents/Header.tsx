@@ -1,11 +1,10 @@
 "use client";
 
-interface HeaderProps {
-  language: string;
-  onLanguageChange: (lang: string) => void;
-}
+import { useLanguage } from "../../contexts/LanguageContext";
 
-export default function Header({ language, onLanguageChange }: HeaderProps) {
+export default function Header() {
+  const { language, setLanguage } = useLanguage();
+
   return (
     <header className="border-b border-gray-200 dark:border-gray-700 py-6 bg-white dark:bg-gray-900">
       <div className="container mx-auto px-4">
@@ -19,7 +18,7 @@ export default function Header({ language, onLanguageChange }: HeaderProps) {
           </div>
           <div className="flex-1 flex justify-end gap-2">
             <button
-              onClick={() => onLanguageChange("en")}
+              onClick={() => setLanguage("en")}
               className={`text-2xl transition-opacity ${
                 language === "en"
                   ? "opacity-100"
@@ -30,7 +29,7 @@ export default function Header({ language, onLanguageChange }: HeaderProps) {
               🇺🇸
             </button>
             <button
-              onClick={() => onLanguageChange("pt")}
+              onClick={() => setLanguage("pt")}
               className={`text-2xl transition-opacity ${
                 language === "pt"
                   ? "opacity-100"
