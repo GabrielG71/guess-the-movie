@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLanguage } from "./contexts/LanguageContext";
 import MovieInput from "./components/MovieInput";
 import ResultModal from "./components/ResultModal";
 
@@ -8,7 +9,7 @@ const API_KEY = "241abcb6a8de5f1147f09a5f83b41282";
 const BASE_URL = "https://api.themoviedb.org/3";
 
 export default function Home() {
-  const [language, setLanguage] = useState("en");
+  const { language } = useLanguage();
   const [movie, setMovie] = useState(null);
   const [currentHint, setCurrentHint] = useState(0);
   const [score, setScore] = useState(0);
