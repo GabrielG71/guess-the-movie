@@ -21,7 +21,7 @@ export default function Home() {
   useEffect(() => {
     const fetchRandomMovie = async () => {
       try {
-        const randomPage = Math.floor(Math.random() * 5) + 1;
+        const randomPage = Math.floor(Math.random() * 3) + 1;
         const response = await fetch(
           `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${
             language === "pt" ? "pt-BR" : "en-US"
@@ -62,30 +62,52 @@ export default function Home() {
     const mainActor =
       movie.credits?.cast?.[0]?.name ||
       (language === "en" ? "Unknown" : "Desconhecido");
+    const secondActor =
+      movie.credits?.cast?.[1]?.name ||
+      (language === "en" ? "Unknown" : "Desconhecido");
+    const thirdActor =
+      movie.credits?.cast?.[2]?.name ||
+      (language === "en" ? "Unknown" : "Desconhecido");
     const genres =
       movie.genres?.map((g) => g.name).join(", ") ||
+      (language === "en" ? "Unknown" : "Desconhecido");
+    const voteAverage = movie.vote_average
+      ? movie.vote_average.toFixed(1)
+      : "N/A";
+    const productionCountry =
+      movie.production_countries?.[0]?.name ||
       (language === "en" ? "Unknown" : "Desconhecido");
 
     if (language === "pt") {
       return [
-        `Este filme foi lançado na década de ${
+        `Este é um filme de ${genres} que foi produzido em ${productionCountry} e tem uma avaliação de ${voteAverage}/10 no TMDB.`,
+        `Lançado na década de ${
           Math.floor(releaseYear / 10) * 10
-        } e pertence ao(s) gênero(s) ${genres}.`,
-        `O filme tem aproximadamente ${movie.runtime} minutos de duração e foi dirigido por ${director}.`,
-        `Uma das principais estrelas deste filme é ${mainActor}.`,
-        `O slogan do filme é: "${movie.tagline || "Nenhum slogan disponível"}"`,
-        `Este filme foi lançado em ${releaseYear} e começa com a letra "${movie.title[0]}".`,
+        }, este filme foi dirigido por ${director} e tem ${
+          movie.runtime
+        } minutos.`,
+        `O elenco principal inclui ${mainActor}, ${secondActor} e ${thirdActor}.`,
+        `O slogan deste filme é: "${
+          movie.tagline || "Sem slogan disponível"
+        }" e foi lançado em ${releaseYear}.`,
+        `Este filme começa com a letra "${
+          movie.title[0]
+        }" e a sinopse diz: "${movie.overview?.substring(0, 100)}..."`,
       ];
     }
 
     return [
-      `This movie was released in the ${
-        Math.floor(releaseYear / 10) * 10
-      }s and belongs to the ${genres} genre(s).`,
-      `The film has a runtime of approximately ${movie.runtime} minutes and was directed by ${director}.`,
-      `One of the main stars of this movie is ${mainActor}.`,
-      `The movie's tagline is: "${movie.tagline || "No tagline available"}"`,
-      `This film was released in ${releaseYear} and starts with the letter "${movie.title[0]}".`,
+      `This is a ${genres} film produced in ${productionCountry} with a ${voteAverage}/10 rating on TMDB.`,
+      `Released in the ${Math.floor(releaseYear / 10) * 10}s, this ${
+        movie.runtime
+      }-minute film was directed by ${director}.`,
+      `The main cast includes ${mainActor}, ${secondActor}, and ${thirdActor}.`,
+      `The movie's tagline is: "${
+        movie.tagline || "No tagline available"
+      }" and it was released in ${releaseYear}.`,
+      `This film starts with the letter "${
+        movie.title[0]
+      }" and the plot says: "${movie.overview?.substring(0, 100)}..."`,
     ];
   };
 
