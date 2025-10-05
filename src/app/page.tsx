@@ -92,7 +92,7 @@ export default function Home() {
 
   useEffect(() => {
     if (movie) setHints(generateHints(movie));
-  }, [movie]);
+  }, [movie, language]);
 
   const generateHints = (movie: Movie): string[] => {
     const releaseYear = new Date(movie.release_date).getFullYear();
